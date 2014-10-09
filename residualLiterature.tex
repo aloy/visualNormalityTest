@@ -1,0 +1,138 @@
+\documentclass[11pt]{article} % JASA requires 12 pt font for manuscripts
+
+% for citations
+\usepackage[authoryear]{natbib} % natbib required for JASA
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue]{hyperref}
+\newcommand{\citetapos}[1]{\citeauthor{#1}{\textcolor{blue}{'s}} }
+
+%\definecolor{Blue}{rgb}{0,0,0.5}
+
+\usepackage{amsthm}
+
+% for figures
+\usepackage{graphicx}
+\usepackage[font=small]{caption}
+\graphicspath{{figures/}}
+\newcommand{\hh}[1]{{\color{orange} #1}}
+\newcommand{\al}[1]{{\color{red} #1}}
+
+% color in tables
+\usepackage{rotating}
+\usepackage{color}
+
+% help with editing and coauthoring
+\usepackage{todonotes}
+
+% title formatting
+\usepackage[compact,small]{titlesec}
+% page formatting
+\usepackage[margin = 1in]{geometry}
+%\usepackage[parfill]{parskip}
+
+% line spacing
+\usepackage{setspace}
+\doublespacing
+
+% For math typsetting
+\usepackage{bm}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+
+\pdfminorversion=4 % Instructed by JCGS submission
+
+\begin{document}
+\title{Overview of Literature on Residuals for LMEs}
+\author{
+	Adam Loy and Heike Hofmann\\
+	Department of Mathematics,
+	Lawrence University\\
+	Department of Statistics,
+	Iowa State University
+}
+\date{}
+\maketitle
+
+\section{Model and notation}
+
+\begin{align}\label{eq:lmd}
+	\underset{(n \times 1)}{\bm{y}} &= \underset{(n \times p)}{\bm{X}} \ \underset{(p \times 1)}{\bm{\beta}} + \underset{(n \times q)}{\bm{Z}} \ \underset{(q \times 1)}{\bm{b}} + \underset{(n \times 1)}{\bm{\varepsilon}},\\
+	\bm{\varepsilon} & \overset{\text{iid}}{\sim} \mathcal{N}(\bm{0}, \ \bm{R}), \qquad \bm{b} \overset{\text{iid}}{\sim} \mathcal{N}(\bm{0},\ \bm{D}) \nonumber \\
+	\bm{y} & \sim \mathcal{N}(\bm{X\beta},\ \bm{V}), \qquad \bm{V} = \bm{ZDZ}^\prime + \bm{R}
+\end{align}
+
+\section{General overview articles}
+
+The two articles below have slightly different focuses, but both give overviews of residuals for LMEs. The Haslett article is much more general, while the Nobre article focuses specifically on LMEs.
+
+\begin{itemize}
+\item \cite{Haslett:2007vv}
+\item \cite{Nobre:2007ej}
+\end{itemize}
+
+
+\section{Marginal residuals}
+
+Marginal residuals are discussed in the overview articles, but  \cite{Houseman:2004gq} propose scaling the marginal residuals by the Cholesky root of $\bm{V}$. The results from their paper are convincing that the Cholesky residuals are superior to the ``raw'' marginal residuals.
+
+
+\section{Error terms}
+
+\begin{itemize}
+\item Basic definition: $\widehat{\bm{\varepsilon}} = \bm{y} - \bm{X \widehat{\beta}} + \bm{Z \widehat{b}} = \bm{R P y}$
+
+\item \cite{Nobre:2007ej} recommend using studentized error terms: 
+	$\bm{z}_{\varepsilon} =  \text{diag} \left(\bm{RPR} \right)^{-1/2} \widehat{\bm{\varepsilon}}$
+	
+\item \citet[Section 4.3]{Pinhiero:2000vf} use the Pearson residuals: $ \widehat{\bm{\varepsilon}} / \widehat{\sigma}_\varepsilon$
+
+\end{itemize}
+
+
+
+\section{Random effects}
+
+\begin{itemize}
+
+\item Basic definition: $\widehat{\bm{b}} = \bm{D Z^\prime V^{-1}} \left( \bm{y} - \bm{X \widehat{\beta}} \right) = \bm{D Z^\prime P y}$
+
+\item When $\widehat{\bm{D}}$ and $\widehat{\bm{V}}$ are utilized, these are called the empirical best linear unbiased predictors (EBLUPs) of the random effects.
+
+\item \cite{Lange:1989uu} suggest a standardized form, which \cite{Goldstein:2011} suggests only when the number of groups is large: $\bm{z}_{b} = \text{diag} \left(\bm{DZ^\prime V^{-1} ZD}\right)^{-1/2} \widehat{\bm{b}}$
+
+\item \cite{Lange:1989uu} also suggest the use of a weight Q-Q plot rather than the standard Q-Q plot
+
+\item \cite{Goldstein:2011} suggests a second standardization which applies for all sample sizes: $\bm{z}_{b} = \text{diag} \left(\bm{DZ^\prime P ZD}\right)^{-1/2} \widehat{\bm{b}}
+$
+
+\item \citet[Theorem 3.2 and Lemma 3.1]{Jiang:1998vt} discusses the strong assumptions needed for the residuals in LMEs to converge in probability to their true distributions. My simulation results have revealed that this is mainly a problem with the EBLUPs.
+
+\end{itemize}
+
+\section{Existing normality tests/graphics}
+
+\begin{itemize}
+
+\item \cite{calvin1991} use EBLUPs to assess normality of random effects and premultiply $\bm{y}$ by the square root of $\widehat{\bm{V}}$ to assess normality of the error terms. Q-Q plots are used in both cases.
+
+\item \cite{Verbeke:1996va} suggests comparing the normal model to a model using finite mixtures of normal distributions for the random effects.
+
+\item \cite{Jiang:2001up}: an innovation on a $\chi^2$ test. This does not lend itself to graphical inspection.
+
+\item \cite{houseman2006}: Lange and Ryan's test is a special case. I get a bit lost in the linear algebra. The idea is to adjust the Q-Q plots and use a bootstrap for the envelope.
+
+\item \cite{claeskens2009} give an overview of testing methods for mixed models. This is a dense paper, and I don't remember all of the details, but it might be a good pointer for an overview of other methods.
+
+\end{itemize}
+
+%----------------------------------------------------------------------------------
+%----------------------------------------------------------------------------------
+\bibliographystyle{apa}
+\bibliography{vizNormalityTest}
+%----------------------------------------------------------------------------------
+%----------------------------------------------------------------------------------
+
+
+\end{document}
