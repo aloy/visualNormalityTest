@@ -12,3 +12,7 @@
 *.gz
 
 residualLiterature.pdf
+
+*.history
+
+R code/.Rhistory

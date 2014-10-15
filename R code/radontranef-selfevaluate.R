@@ -16,7 +16,8 @@
 # Preliminaries
 #-------------------------------------------------------------------------------
 
-setwd("~/Documents/Thesis/Dissertation/sociology_chapter/")
+# setwd() first
+
 library(ggplot2)
 library(lme4)     # for modeling
 library(HLMdiag)  # for residuals
@@ -26,33 +27,33 @@ library(reshape2)
 library(stringr)
 library(mvtnorm)
 
-BlockZ <- function(object) {
-  Z <- getME(object, "Z")
-  
-  grp.size <- table(object@flist)
-  ngrps <- length(grp.size)
-  nranef <- dim(ranef(object)[[1]])[2]
-  
-  base.ord <- seq(from = 1, by = ngrps, length.out = nranef)
-  ord <- base.ord + rep(0:(ngrps - 1), each = nranef)
-  
-  perm.mat <- t(as(ord, "pMatrix"))
-  
-  return(Z %*% perm.mat)
-}
+# BlockZ <- function(object) {
+#   Z <- getME(object, "Z")
+#   
+#   grp.size <- table(object@flist)
+#   ngrps <- length(grp.size)
+#   nranef <- dim(ranef(object)[[1]])[2]
+#   
+#   base.ord <- seq(from = 1, by = ngrps, length.out = nranef)
+#   ord <- base.ord + rep(0:(ngrps - 1), each = nranef)
+#   
+#   perm.mat <- t(as(ord, "pMatrix"))
+#   
+#   return(Z %*% perm.mat)
+# }
 
 
 lev2.marginal.var <- function(.model) {
-  y <- .model@y
+  y <- getME(.model, "y")
   X <- getME(.model, "X")
-  Z <- BlockZ(.model)
+  Z <- HLMdiag:::BlockZ(.model)
   n <- nrow(X)
   ngrps <- unname(sapply(.model@flist, function(x) length(levels(x))))
   
   # Constructing V = Cov(Y)
-  sig0 <- attr(VarCorr(.model), "sc") # sigma(.model)
+  sig0 <- sigma(.model)
   
-  ZDZt <- sig0^2 * crossprod( .model@A )
+  ZDZt <- sig0^2 * crossprod( getME(.model, "A") )
   R    <- Diagonal( n = n, x = sig0^2 )
   D    <- kronecker( Diagonal(ngrps), bdiag(VarCorr(.model)) )
   V    <- Diagonal(n) + ZDZt
@@ -69,11 +70,12 @@ lev2.marginal.var <- function(.model) {
   return(semat)
 }
 
+
 std_ranef <- function(.model) {
 	res <- ranef(.model)[[1]]
 	semat <- lev2.marginal.var(.model)
 	
-	RVAL <- res / semat
+	RVAL <- res / semat ## ISSUE: we can get NaNs if SEs are 0
 	return(RVAL)
 }
 
@@ -96,9 +98,8 @@ sim_t_hlm <- function(.mod) {
 	D  <- as.matrix( bdiag(vc) )
 	sig.e <- sigma(.mod)
 	
-	dims <- .mod@dims
-	n <- dims[["n"]]
-	m <- dims[["q"]] / nrow(D)
+	n <- nobs(.mod)
+	m <- unname( getME(.mod, "q") ) / nrow(D)
 
 	## normal errors
 	e  <- rnorm(n = n, mean = 0, sd = sig.e)
@@ -118,10 +119,9 @@ sim_t_hlm <- function(.mod) {
 sim_indep_ranef_hlm <- function(.mod, nsim, e.dsn, b0.dsn, b1.dsn, sigma.err, sigma.b0, sigma.b1){
   vc <- VarCorr( .mod )
 	
-	dims <- .mod@dims
-	n <- dims[["n"]]
-	m <- dims[["q"]] / dims[["nt"]]
-	
+  n <- nobs(.mod)
+  m <- unname( getME(.mod, "q") ) / nrow(D)
+  
 	## Simulating error terms
 	if(e.dsn == "norm") {
 		e  <- rnorm(n = nsim * n, mean = 0, sd = sigma.err)
@@ -226,7 +226,7 @@ write.table(res, file="tranef-results.csv", sep=",", append=file.exists("tranef-
 }
 
 for (i in 1:10)
-	showNext("heike")
+	showNext("adam")
 
 #df <- read.csv("tranef-results.csv")
 df <- read.csv(file.choose(), stringsAsFactors=FALSE)
