@@ -53,16 +53,16 @@ lev2.marginal.var <- function(.model) {
   # Constructing V = Cov(Y)
   sig0 <- sigma(.model)
   
-  ZDZt <- sig0^2 * crossprod( getME(.model, "A") )
-  R    <- Diagonal( n = n, x = sig0^2 )
+  ZDZt <- crossprod( getME(.model, "A") ) # sig0^2 * crossprod( getME(.model, "A") )
+  R    <- Diagonal(n) # Diagonal( n = n, x = sig0^2 )
   D    <- kronecker( Diagonal(ngrps), bdiag(VarCorr(.model)) )
-  V    <- Diagonal(n) + ZDZt
+  V    <- R + ZDZt
   
   # Inverting V
   V.chol <- chol( V )
   Vinv   <- chol2inv( V.chol )
 
-  bse <- crossprod( chol(Vinv) %*% Z %*% D ) # Marginal COV. used by Lange and Ryan
+  bse <- sig0^2 crossprod( chol(Vinv) %*% Z %*% D ) # Marginal COV. used by Lange and Ryan
   bse.diag <- diag(bse)
 
   semat <- matrix(sqrt(bse.diag), ncol = 2, byrow = TRUE)
@@ -183,7 +183,8 @@ showPlot <- function(dframe) {
 
 #load("~/Documents/Thesis/Dissertation/sociology_chapter/data/radon.RData")
 load(file.choose())
-fm <- lmer(log.radon ~ basement + uranium + (1 | county) + (basement - 1 | county), data = radon)
+fm <- lmer(log.radon ~ basement + uranium + (1 | county) + (basement - 1 | county), 
+           data = radon)
 
 
 showNext <- function(whoami) {
