@@ -16,16 +16,17 @@
 # Preliminaries
 #-------------------------------------------------------------------------------
 
+# required to TS test bands
+library(mvtnorm)    # for the multivariate normal distribution
+library(robustbase) # for robust estimates for the mean and sd
+
+
 library(ggplot2)
 library(lme4)     # for modeling
 library(HLMdiag)  # for residuals
 library(plyr)     # for formating data for lineups
 library(reshape2) # for formating data for lineups
 library(stringr) # for formating data for lineups
-
-# required to TS test bands
-library(mvtnorm)    # for the multivariate normal distribution
-library(robustbase) # for robust estimates for the mean and sd
 
 
 source("functions.R") 
