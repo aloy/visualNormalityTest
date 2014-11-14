@@ -160,7 +160,10 @@ simLineup <- function(.mod, e.dsn, alt.b0.dsn, null.b0.dsn, sigma.err, sigma.b0)
   lineup_data$sample <- sample(20,20, replace=FALSE)[lineup_data$.n]
   location <- lineup_data$sample[nrow(lineup_data)]
   #write.csv(tranef, file=sprintf("radontranef-test/radontranef-%s-%s.csv", null, location))
+  # show the lineup
   showPlot(lineup_data)
+  # return pieces that went into the plot
+  list(location=location, b1=b1)
 }
 
 #-------------------------------------------------------------------------------

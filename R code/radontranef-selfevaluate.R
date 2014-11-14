@@ -188,42 +188,17 @@ fm <- lmer(log.radon ~ basement + uranium + (1 | county) + (basement - 1 | count
 
 
 showNext <- function(whoami) {
-sim_step <- sim_t_hlm(fm)
-y.b.t <- sim_step$y
-refit.b.t <-  refit(fm, y.b.t)
-b.t <- ranef(refit.b.t)[[1]]
-
-sim.y   <- simulate(fm, nsim = 19)                        
-sim.mod <- apply(sim.y, 2, refit, object = fm)            ## a list of models
-
-
-
-sim.b1 <- llply(sim.mod, function(x) ranef(x)[[1]][,2])   ## a list of random slopes
-sim.b1 <- melt( do.call("rbind", sim.b1) )[,-2]           ## changing to a data frame
-names(sim.b1) <- c("sample", "basement")                  ## setting colnames for faceting
-sim.b1        <- arrange(sim.b1, sample)                  ## ordering by simulation
-
-sim.b1$.n <- as.numeric( str_extract(sim.b1$sample, "\\d+") )
-sim.b1 <- ddply(sim.b1, .(.n), transform, band = sim_env(basement), 
-	x = sort(qqnorm(basement, plot.it=FALSE)$x))
-
-b1 <- data.frame(.n=20, transform(b.t, band = sim_env(basement), 
-	x = sort(qqnorm(basement, plot.it=FALSE)$x)))
-
-tranef <- rbind(sim.b1[,c(".n", "basement", "x", "band.lower", "band.upper")],
-				b1[,c(".n", "basement", "x", "band.lower", "band.upper")])
-tranef$sample <- sample(20,20, replace=FALSE)[tranef$.n]
-location <- tranef$sample[nrow(tranef)]
-#write.csv(tranef, file=sprintf("radontranef-test/radontranef-%s-%s.csv", null, location))
-correct <- showPlot(tranef)
-choice <- scan()
-response <- paste(choice, collapse=",")
-if (file.exists("tranef-results.csv")) {
-	df <-read.csv("tranef-results.csv")
-	k <- max(df$step)+1
-} else k <- 1
-res <- data.frame(id=whoami, step=k, b0=sim_step$b[,1],b1=sim_step$b[,2], response=response, location_no=location)
-write.table(res, file="tranef-results.csv", sep=",", append=file.exists("tranef-results.csv"), row.names=FALSE, col.names=!file.exists("tranef-results.csv"))
+  lps <- simLineup(.mod = fm, e.dsn = "exp", alt.b0.dsn = "exp", null.b0.dsn = "norm", 
+                   sigma.err = 2, sigma.b0 = 1)
+  
+  choice <- scan()
+  response <- paste(choice, collapse=",")
+  if (file.exists("tranef-results.csv")) {
+    df <-read.csv("tranef-results.csv")
+    k <- max(df$step)+1
+  } else k <- 1
+  res <- data.frame(id=whoami, step=k, response=response, location_no=lps$location)
+  write.table(res, file="tranef-results.csv", sep=",", append=file.exists("tranef-results.csv"), row.names=FALSE, col.names=!file.exists("tranef-results.csv"))
 }
 
 for (i in 1:10)
